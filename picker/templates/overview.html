@@ -1,0 +1,356 @@
+{% load staticfiles %}
+<html>
+<head>
+<title>Le chores</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'agenda.css' %}"/>
+
+</head>
+<body>
+<div class='container'>
+    {% if user.is_authenticated %}
+        <p>{{user.name}} ({{user.weekly_modifier}} | {{user.daily_modifier}}) <a href='/logout'>Logout</a></p>
+    {% else %}
+        {% if form.errors %}
+            <p>Invalid username/password. </p>
+        {% endif %}
+        <form method='post' action='/signin/'>
+            {% csrf_token %}
+            <label for='id_username'>Email:</label>
+            {{login_form.username}}
+            <label for='id_password'>Password:</label>
+            {{login_form.password}}
+            <input class='button' type='submit' value='Sign in'/>
+        </form>
+    {% endif %}
+    <div>Refreshes every Sunday at 9:30AM</div>
+</div>
+
+<div class='container'>
+    <h2>Daily</h2>
+    <div class='agenda'>
+        <div class='table-responsive'>
+            <table class='table table-condensed table-bordered'>
+                <thead>
+                    <tr >
+                        <th>Day</th>
+                        <th>Chore</th>
+                        <th>Person</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{sun_rows}}'>
+                            <div class='dayofweek'>Sunday</div>
+                        </td>
+                    </tr>
+                    {% for sc in sun_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{mon_rows}}'>
+                            <div class='dayofweek'>Monday</div>
+                        </td>
+                    </tr>
+                    {% for sc in mon_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{tue_rows}}'>
+                            <div class='dayofweek'>Tuesday</div>
+                        </td>
+                    </tr>
+                    {% for sc in tue_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{wed_rows}}'>
+                            <div class='dayofweek'>Wednesday</div>
+                        </td>
+                    </tr>
+                    {% for sc in wed_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{thu_rows}}'>
+                            <div class='dayofweek'>Thursday</div>
+                        </td>
+                    </tr>
+                    {% for sc in thu_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{fri_rows}}'>
+                            <div class='dayofweek'>Friday</div>
+                        </td>
+                    </tr>
+                    {% for sc in fri_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class='agenda-date' class='active' rowspan='{{sat_rows}}'>
+                            <div class='dayofweek'>Saturday</div>
+                        </td>
+                    </tr>
+                    {% for sc in sat_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{sc.chore.name}}</td>
+                        {% if sc.done %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif sc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_daily/{{sc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{sc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class='container'>
+    <h2>Weekly</h2>
+    <div class='agenda'>
+        <div class='table-responsive'>
+            <table class='table table-condensed table-bordered'>
+                <thead>
+                    <tr >
+                        <th>Chore</th>
+                        <th>Person</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wc in weekly_chores %}
+                    <tr>
+                        <td class='agenda-chore'>{{wc.chore.name}}</td>
+                        {% if wc.done %}
+                            <td class='agenda-person'>
+                            {{wc.person.name}}
+                            </td>
+                            <td>yes</td>
+                        {% elif wc.person.id == user.id %}
+                            <td class='agenda-person'>
+                            {{wc.person.name}}
+                            </td>
+                            <td>
+                            <form action='/done/{{wc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-success'>Done</button>
+                            </form>
+                            <form action='/give_away_weekly/{{wc.id}}/' method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='btn btn-secondary'>Give away</button>
+                            </form>
+                            </td>
+                        {% else %}
+                            <td class='agenda-person'>
+                            {{wc.person.name}}
+                            </td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html> 
