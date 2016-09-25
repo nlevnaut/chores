@@ -2,12 +2,14 @@ from celery import Celery
 from celery import shared_task, chain, group, chord, Task
 from django.utils import timezone
 from celery.decorators import periodic_task
+import os
 from celery.task.schedules import crontab
 from picker.models import *
+import smtplib
+from email.mime.text import MIMEText
 from collections import deque
 import random
 
-@periodic_task(name='pick_weekly', run_every=crontab(hour=9, minute=0, day_of_week="sun"))
 def pick_weekly():
     check_weekly_done()
     # randomize chores
@@ -39,7 +41,6 @@ def pick_weekly():
         p.save()
         sorted_people = sorted(people, key=lambda x: x.weekly_modifier, reverse=True)
 
-@periodic_task(name='pick_daily', run_every=crontab(hour=9, minute=0, day_of_week="sun"))
 def pick_daily():
     check_daily_done()
     people = list(Person.objects.all())
@@ -115,3 +116,46 @@ def transfer_chore(scheduledChore, newPerson):
     newPerson.save()
     scheduledChore.person = newPerson
     scheduledChore.save()
+
+def send_email():
+    SENDER = os.environ['SENDER']
+    MAILSERVER = os.environ['MAILSERVER']
+    USERNAME = os.environ['USERNAME']
+    PASSWORD = os.environ['PASSWORD']
+
+    sc = ScheduledChore.objects.filter(done=False)
+    people = Person.objects.all()
+    for p in people:
+        body =  'Daily chores:\r\n'
+        body += '-------------\r\n'
+        for d in sc.filter(person=p.id, chore__frequency='daily'):
+            body += d.day_of_week() + ': ' + d.chore.name + '\r\n'
+
+        body += '\r\nWeekly chores:\r\n'
+        body += '--------------\r\n'
+        for w in sc.filter(person=p.id, chore__frequency='weekly'):
+            body += w.chore.name + '\r\n'
+
+        try:
+            msg = MIMEText(body, 'plain')
+            msg['Subject'] = p.name + '\'s chores'
+            msg['From'] = SENDER
+            msg['To'] = p.email
+            server = smtplib.SMTP(MAILSERVER, 587)
+            server.starttls()
+            server.login(USERNAME, PASSWORD)
+            try:
+                server.sendmail(SENDER, p.email, msg.as_string())
+            finally:
+                server.quit()
+        except Exception as e:
+            print('sendmail failed: %s' % str(e))
+    
+
+@periodic_task(name='pick_all', run_every=crontab(hour=9, minute=0, day_of_week="sun"))
+def pick_all(email=True):
+    pick_daily()
+    pick_weekly()
+    if email:
+        send_email()
+    

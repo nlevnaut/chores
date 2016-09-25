@@ -78,3 +78,21 @@ class ScheduledChore(models.Model):
     chore = models.ForeignKey('Chore')
     person = models.ForeignKey('Person')
     done = models.BooleanField(default=False)
+
+    def day_of_week(self):
+        if self.day == 0 or self.day == 7:
+            return "Sun"
+        elif self.day == 1:
+            return "Mon"
+        elif self.day == 2:
+            return "Tue"
+        elif self.day == 3:
+            return "Wed"
+        elif self.day == 4:
+            return "Thu"
+        elif self.day == 5:
+            return "Fri"
+        elif self.day == 6:
+            return "Sat"
+        else:
+            return "wtf"
